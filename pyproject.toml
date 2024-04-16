@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "qr-code-generator-api"
+version = "0.1.0"
+description = "The task involves creating an endpoint that accepts a URL input, generates a QR code image that encodes the provided URL, and enables customization options for the QR code such as size, color, and error correction level, before returning the QR code image in PNG format. Based on previous interactions and searches, here are the compiled steps and technologies to accomplish this:"
+authors = ["AutoGPT <info@agpt.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+fastapi = "^0.78.0"
+prisma = "*"
+pydantic = "*"
+qrcode = "^7.3.1"
+uvicorn = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

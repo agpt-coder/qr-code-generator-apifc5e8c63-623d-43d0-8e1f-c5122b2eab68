@@ -1,0 +1,100 @@
+// datasource db defines the database connection settings.
+// It is configured for PostgreSQL and uses an environment variable for the connection URL.
+// The 'extensions' feature enables the use of PostgreSQL-specific data types.
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+// generator db configures Prisma Client settings.
+// It is set up to use Prisma Client Python with asyncio interface and specific features.
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+  previewFeatures      = ["postgresqlExtensions"]
+}
+
+enum ImageFormat {
+  PNG
+  SVG
+}
+
+enum SubscriptionType {
+  Monthly
+  Yearly
+}
+
+model User {
+  id             String          @id @default(dbgenerated("gen_random_uuid()"))
+  email          String          @unique
+  hashedPassword String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  role           Role
+  QRCodeRequests QRCodeRequest[]
+  ApiKey         ApiKey[]
+  Subscription   Subscription[]
+  AccessLog      AccessLog[]
+}
+
+model QRCodeRequest {
+  id              String          @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  url             String
+  size            Int             @default(250)
+  color           String          @default("black")
+  backgroundColor String          @default("white")
+  errorCorrection ErrorCorrection @default(Medium)
+  imageFormat     ImageFormat     @default(PNG)
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ApiKey {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  key       String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id               String           @id @default(dbgenerated("gen_random_uuid()"))
+  userId           String
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+  subscriptionType SubscriptionType
+  validUntil       DateTime
+}
+
+model AccessLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()"))
+  accessedAt DateTime @default(now())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+}
+
+model RateLimit {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  bucketKey String   @unique
+  tokens    Int
+  resetAt   DateTime
+}
+
+enum Role {
+  Admin
+  User
+  PremiumUser
+}
+
+enum ErrorCorrection {
+  Low
+  Medium
+  Quatritable
+  High
+}
+
